@@ -11,8 +11,10 @@ import com.example.booksearchapp.data.model.Book
 import com.example.booksearchapp.data.model.SearchResponse
 import com.example.booksearchapp.data.repository.BookSearchRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -72,6 +74,19 @@ class BookSearchViewModel(
         bookSearchRepository.getFavoritePagingBooks()
             .cachedIn(viewModelScope)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PagingData.empty())
+
+    private val _searchPagingResult = MutableStateFlow<PagingData<Book>>(PagingData.empty())
+    val searchPagingResult: StateFlow<PagingData<Book>> get() = _searchPagingResult.asStateFlow()
+
+    fun searchBooksPaging(query: String) {
+        viewModelScope.launch {
+            bookSearchRepository.searchBooksPaging(query, getSortMode())
+                .cachedIn(viewModelScope)
+                .collect {
+                    _searchPagingResult.value = it
+                }
+        }
+    }
 
     companion object {
         private const val TAG = "BookSearchViewModel"
