@@ -9,7 +9,9 @@ import com.example.booksearchapp.data.model.Book
 import com.example.booksearchapp.data.model.SearchResponse
 import com.example.booksearchapp.data.repository.BookSearchRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class BookSearchViewModel(
@@ -20,6 +22,9 @@ class BookSearchViewModel(
     // Api
     private val _searchResult = MutableLiveData<SearchResponse>()
     val searchResult: LiveData<SearchResponse> get() = _searchResult
+
+    val favoriteBooks: StateFlow<List<Book>> = bookSearchRepository.getFavoriteBooks()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf())
 
     var query = String()
         set(value) {
@@ -48,8 +53,6 @@ class BookSearchViewModel(
     fun deleteBooks(book: Book) = viewModelScope.launch(Dispatchers.IO) {
         bookSearchRepository.deleteBooks(book)
     }
-
-    fun favoriteBooks(): Flow<List<Book>> = bookSearchRepository.getFavoriteBooks()
 
     companion object {
         private const val TAG = "BookSearchViewModel"
