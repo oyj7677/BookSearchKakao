@@ -9,6 +9,7 @@ import com.example.booksearchapp.data.model.Book
 import com.example.booksearchapp.data.model.SearchResponse
 import com.example.booksearchapp.data.repository.BookSearchRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class BookSearchViewModel(
@@ -48,7 +49,7 @@ class BookSearchViewModel(
         bookSearchRepository.deleteBooks(book)
     }
 
-    fun getFavoriteBooks(): LiveData<List<Book>> = bookSearchRepository.getFavoriteBooks()
+    fun favoriteBooks(): Flow<List<Book>> = bookSearchRepository.getFavoriteBooks()
 
     companion object {
         private const val TAG = "BookSearchViewModel"
